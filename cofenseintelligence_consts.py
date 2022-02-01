@@ -59,4 +59,5 @@ PHISHME_CONTAINER_ERROR = "Error while creating container"
 PHISHME_ARTIFACTS_DESC = "Artifact created by Cofense Intelligence app"
 PHISHME_ARTIFACTS_ERROR = "Error while creating artifact"
 PHISHME_THREAT_DATA_ERROR = "Error while getting details for threat ID {id}. Response message: {message}"
-PHISHME_INVALID_LIMIT_MSG = "Please provide a non-zero positive integer in the poll_now_ingestion_span and first_scheduled_ingestion_span parameters."
+PHISHME_INVALID_LIMIT_MSG = ("Please provide a non-zero positive integer in the poll_now_ingestion_span "
+                             "and first_scheduled_ingestion_span parameters.")
