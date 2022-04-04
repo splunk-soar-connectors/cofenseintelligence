@@ -2,11 +2,11 @@
 # Cofense Intelligence
 
 Publisher: Splunk  
-Connector Version: 2\.0\.1  
+Connector Version: 2\.0\.5  
 Product Vendor: Cofense  
 Product Name: Cofense Intelligence  
 Product Version Supported (regex): "\.\*"  
-Minimum Product Version: 4\.9\.39220  
+Minimum Product Version: 5\.1\.0  
 
 This App integrates with Cofense Intelligence to provide various hunting and reporting actions in addition to threat ingestion
 
