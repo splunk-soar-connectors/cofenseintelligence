@@ -1,9 +1,17 @@
 # File: cofenseintelligence_consts.py
-# Copyright (c) 2020-2021 Splunk Inc.
 #
-# Licensed under Apache 2.0 (https://www.apache.org/licenses/LICENSE-2.0.txt)
+# Copyright (c) 2020-2022 Splunk Inc.
 #
-
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under
+# the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+# either express or implied. See the License for the specific language governing permissions
+# and limitations under the License.
 PHISHME_API_SEARCH = "https://www.threathq.com/apiv1"
 PHISHME_API_THREAT_UPDATE = "/threat/updates"
 PHISHME_ENDPOINT = "/threat/search"
@@ -51,4 +59,5 @@ PHISHME_CONTAINER_ERROR = "Error while creating container"
 PHISHME_ARTIFACTS_DESC = "Artifact created by Cofense Intelligence app"
 PHISHME_ARTIFACTS_ERROR = "Error while creating artifact"
 PHISHME_THREAT_DATA_ERROR = "Error while getting details for threat ID {id}. Response message: {message}"
-PHISHME_INVALID_LIMIT_MSG = "Please provide a non-zero positive integer in the poll_now_ingestion_span and first_scheduled_ingestion_span parameters."
+PHISHME_INVALID_LIMIT_MSG = ("Please provide a non-zero positive integer in the poll_now_ingestion_span "
+                             "and first_scheduled_ingestion_span parameters.")
