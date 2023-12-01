@@ -160,7 +160,7 @@ class PhishMeConnector(BaseConnector):
             except Exception as e:
                 return (action_result.set_status(
                     phantom.APP_ERROR,
-                    PHISHME_ERR_JSON_PARSE.format(raw_text=response.text),
+                    PHISHME_ERROR_JSON_PARSE.format(raw_text=response.text),
                     e), resp_data)
         else:
             resp_data = response.text
@@ -199,7 +199,7 @@ class PhishMeConnector(BaseConnector):
             self.set_status(phantom.APP_ERROR, PHISHME_CONNECTION_TEST_ERROR_MSG)
             return action_result.get_status()
 
-        self.set_status_save_progress(phantom.APP_SUCCESS, PHISHME_CONNECTION_TEST_SUCC_MSG)
+        self.set_status_save_progress(phantom.APP_SUCCESS, PHISHME_CONNECTION_TEST_SUCCESS_MSG)
         return action_result.get_status()
 
     # Function to search threats from PhishMe database based on

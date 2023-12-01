@@ -23,7 +23,7 @@ PHISHME_CONNECTION_TEST_ERROR_MSG = "Test Connectivity Failed"
 PHISHME_CONNECTION_TEST_SUCCESS_MSG = "Test Connectivity Passed"
 PHISHME_ERROR_SERVER_CONNECTION = "Connection failed"
 PHISHME_LOGIN_ERROR = "API Username or API Password not configured"
-PHISHME_ERR_JSON_PARSE = 'Unable to parse the fields parameter into a \
+PHISHME_ERROR_JSON_PARSE = 'Unable to parse the fields parameter into a \
 dictionary. \n    Response text - {raw_text}'
 PHISHME_ERROR_FROM_SERVER = "API failed\nStatus code: {status}\nDetail: \
 {detail}"
