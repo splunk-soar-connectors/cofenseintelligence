@@ -1,6 +1,6 @@
 # File: cofenseintelligence_consts.py
 #
-# Copyright (c) 2020-2022 Splunk Inc.
+# Copyright (c) 2020-2023 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@ PHISHME_API_SEARCH = "https://www.threathq.com/apiv1"
 PHISHME_API_THREAT_UPDATE = "/threat/updates"
 PHISHME_ENDPOINT = "/threat/search"
 PHISHME_ENDPOINT_GET_REPORT_MALWARE = '/threat/malware/'
-PHISHME_ERR_API_UNSUPPORTED_METHOD = "Unsupported method {method}"
+PHISHME_ERROR_API_UNSUPPORTED_METHOD = "Unsupported method {method}"
 PHISHME_CONNECTION_TEST_MSG = "Querying endpoint to verify the credentials \
 provided"
-PHISHME_CONNECTION_TEST_ERR_MSG = "Test Connectivity Failed"
-PHISHME_CONNECTION_TEST_SUCC_MSG = "Test Connectivity Passed"
-PHISHME_ERR_SERVER_CONNECTION = "Connection failed"
+PHISHME_CONNECTION_TEST_ERROR_MSG = "Test Connectivity Failed"
+PHISHME_CONNECTION_TEST_SUCCESS_MSG = "Test Connectivity Passed"
+PHISHME_ERROR_SERVER_CONNECTION = "Connection failed"
 PHISHME_LOGIN_ERROR = "API Username or API Password not configured"
-PHISHME_ERR_JSON_PARSE = 'Unable to parse the fields parameter into a \
+PHISHME_ERROR_JSON_PARSE = 'Unable to parse the fields parameter into a \
 dictionary. \n    Response text - {raw_text}'
-PHISHME_ERR_FROM_SERVER = "API failed\nStatus code: {status}\nDetail: \
+PHISHME_ERROR_FROM_SERVER = "API failed\nStatus code: {status}\nDetail: \
 {detail}"
 PHISHME_CONFIG_API_USERNAME = "username"
 PHISHME_CONFIG_API_PASSWORD = "password"

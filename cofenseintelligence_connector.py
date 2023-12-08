@@ -1,6 +1,6 @@
 # File: cofenseintelligence_connector.py
 #
-# Copyright (c) 2020-2022 Splunk Inc.
+# Copyright (c) 2020-2023 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -124,10 +124,10 @@ class PhishMeConnector(BaseConnector):
         try:
             request_func = getattr(requests, method)
         except:
-            self.debug_print(PHISHME_ERR_API_UNSUPPORTED_METHOD.format(method=str(method)))
+            self.debug_print(PHISHME_ERROR_API_UNSUPPORTED_METHOD.format(method=str(method)))
             # set the action_result status to error, the handler function
             # will most probably return as is
-            return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERR_API_UNSUPPORTED_METHOD, method=str(method)),
+            return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERROR_API_UNSUPPORTED_METHOD, method=str(method)),
                     resp_data)
 
         # Make the call
@@ -138,13 +138,13 @@ class PhishMeConnector(BaseConnector):
             self.debug_print("Exception while making request: {}".format(str(e)))
             # set the action_result status to error, the handler function
             # will most probably return as is
-            return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERR_SERVER_CONNECTION, e),
+            return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERROR_SERVER_CONNECTION, e),
                     resp_data)
 
         if response.status_code in list(error_resp_dict.keys()):
             # set the action_result status to error, the handler function
             # will most probably return as is
-            return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERR_FROM_SERVER, status=response.status_code,
+            return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERROR_FROM_SERVER, status=response.status_code,
                                              detail=error_resp_dict[response.status_code]),
                     resp_data)
 
@@ -160,7 +160,7 @@ class PhishMeConnector(BaseConnector):
             except Exception as e:
                 return (action_result.set_status(
                     phantom.APP_ERROR,
-                    PHISHME_ERR_JSON_PARSE.format(raw_text=response.text),
+                    PHISHME_ERROR_JSON_PARSE.format(raw_text=response.text),
                     e), resp_data)
         else:
             resp_data = response.text
@@ -177,11 +177,11 @@ class PhishMeConnector(BaseConnector):
             message = PHISHME_REST_RESP_OTHER_ERROR_MSG
 
         # All other response codes from Rest call are failures
-        self.debug_print(PHISHME_ERR_FROM_SERVER.format(status=response.status_code, detail=message))
+        self.debug_print(PHISHME_ERROR_FROM_SERVER.format(status=response.status_code, detail=message))
 
         # set the action_result status to error, the handler function
         # will most probably return as is
-        return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERR_FROM_SERVER, status=response.status_code,
+        return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERROR_FROM_SERVER, status=response.status_code,
                                          detail=message), resp_data)
 
     # Function to test connectivity of asset
@@ -196,10 +196,10 @@ class PhishMeConnector(BaseConnector):
 
         if phantom.is_fail(return_value):
             self.save_progress(action_result.get_message())
-            self.set_status(phantom.APP_ERROR, PHISHME_CONNECTION_TEST_ERR_MSG)
+            self.set_status(phantom.APP_ERROR, PHISHME_CONNECTION_TEST_ERROR_MSG)
             return action_result.get_status()
 
-        self.set_status_save_progress(phantom.APP_SUCCESS, PHISHME_CONNECTION_TEST_SUCC_MSG)
+        self.set_status_save_progress(phantom.APP_SUCCESS, PHISHME_CONNECTION_TEST_SUCCESS_MSG)
         return action_result.get_status()
 
     # Function to search threats from PhishMe database based on
