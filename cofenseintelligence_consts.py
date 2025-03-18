@@ -28,7 +28,7 @@ dictionary. \n    Response text - {raw_text}"
 PHISHME_ERROR_FROM_SERVER = "API failed\nStatus code: {status}\nDetail: \
 {detail}"
 PHISHME_CONFIG_API_USERNAME = "username"
-PHISHME_CONFIG_API_PASSWORD = "password"
+PHISHME_CONFIG_API_PASSWORD = "password"  # pragma: allowlist secret
 PHISHME_CONFIG_POLL_NOW_DAYS = "poll_now_ingestion_span"
 PHISHME_CONFIG_INGEST = "first_scheduled_ingestion_span"
 PHISHME_JSON_FILE = "hash"
