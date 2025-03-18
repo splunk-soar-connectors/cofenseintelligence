@@ -1,6 +1,6 @@
 # File: cofenseintelligence_connector.py
 #
-# Copyright (c) 2020-2023 Splunk Inc.
+# Copyright (c) 2020-2025 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,11 +31,9 @@ from cofenseintelligence_consts import *
 
 
 class PhishMeConnector(BaseConnector):
-
     def __init__(self):
-
         # Calling the BaseConnector's init function
-        super(PhishMeConnector, self).__init__()
+        super().__init__()
         self._api_username = None
         self._api_password = None
         self._num_days = None
@@ -55,20 +53,16 @@ class PhishMeConnector(BaseConnector):
     # Initialize variables and load the previous state that
     # that will be used during ingestion
     def initialize(self):
-
         self._state = self.load_state()
         config = self.get_config()
-        self._api_username = UnicodeDammit(config[PHISHME_CONFIG_API_USERNAME]).unicode_markup.encode('utf-8')
+        self._api_username = UnicodeDammit(config[PHISHME_CONFIG_API_USERNAME]).unicode_markup.encode("utf-8")
         self._api_password = config[PHISHME_CONFIG_API_PASSWORD]
 
         num_days = config.get(PHISHME_CONFIG_POLL_NOW_DAYS, PHISHME_DEFAULT_POLL_NOW_SPAN_DAYS)
         first_ingestion_span = config.get(PHISHME_CONFIG_INGEST, PHISHME_DEFAULT_FIRST_INGEST_SPAN_DAYS)
 
         if not (self.is_non_zero_positive_int(num_days) and self.is_non_zero_positive_int(first_ingestion_span)):
-            return self.set_status(
-                phantom.APP_ERROR,
-                PHISHME_INVALID_LIMIT_MSG
-            )
+            return self.set_status(phantom.APP_ERROR, PHISHME_INVALID_LIMIT_MSG)
 
         self._num_days = int(num_days)
         self._first_ingestion_span = int(first_ingestion_span)
@@ -76,13 +70,11 @@ class PhishMeConnector(BaseConnector):
         return phantom.APP_SUCCESS
 
     def finalize(self):
-
         self.save_state(self._state)
         return phantom.APP_SUCCESS
 
     # Function to handle actions supported by app
     def handle_action(self, param):
-
         # Dictionary containing function name of each action
         action_details = {
             "hunt_url": self._hunt_url,
@@ -91,7 +83,7 @@ class PhishMeConnector(BaseConnector):
             "hunt_domain": self._hunt_domain,
             "get_report": self._get_report,
             "on_poll": self._on_poll,
-            "test_asset_connectivity": self._test_asset_connectivity
+            "test_asset_connectivity": self._test_asset_connectivity,
         }
 
         action = self.get_action_identifier()
@@ -106,7 +98,6 @@ class PhishMeConnector(BaseConnector):
     # Function that makes the REST call to the device,
     # generic function that can be called from various action handlers
     def _make_rest_call(self, endpoint, action_result, params=None, body=None, method="post"):
-
         auth = (self._api_username, self._api_password)
 
         resp_data = None
@@ -116,7 +107,7 @@ class PhishMeConnector(BaseConnector):
             PHISHME_REST_RESP_SYNTAX_INCORRECT: PHISHME_REST_RESP_SYNTAX_INCORRECT_MSG,
             PHISHME_REST_RESP_FAILED_AUTHORIZATION: PHISHME_REST_RESP_FAILED_AUTHORIZATION_MSG,
             PHISHME_REST_RESP_SERVER_ERROR: PHISHME_REST_RESP_SERVER_ERROR_MSG,
-            PHISHME_REST_RESP_SERVER_UNREACHABLE: PHISHME_REST_RESP_SERVER_UNREACHABLE_MSG
+            PHISHME_REST_RESP_SERVER_UNREACHABLE: PHISHME_REST_RESP_SERVER_UNREACHABLE_MSG,
         }
 
         # get, post or put, whatever the caller asked us to use,
@@ -127,41 +118,39 @@ class PhishMeConnector(BaseConnector):
             self.debug_print(PHISHME_ERROR_API_UNSUPPORTED_METHOD.format(method=str(method)))
             # set the action_result status to error, the handler function
             # will most probably return as is
-            return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERROR_API_UNSUPPORTED_METHOD, method=str(method)),
-                    resp_data)
+            return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERROR_API_UNSUPPORTED_METHOD, method=str(method)), resp_data)
 
         # Make the call
         try:
             response = request_func(PHISHME_API_SEARCH + endpoint, auth=auth, params=params, data=body)
 
         except Exception as e:
-            self.debug_print("Exception while making request: {}".format(str(e)))
+            self.debug_print(f"Exception while making request: {e!s}")
             # set the action_result status to error, the handler function
             # will most probably return as is
-            return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERROR_SERVER_CONNECTION, e),
-                    resp_data)
+            return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERROR_SERVER_CONNECTION, e), resp_data)
 
         if response.status_code in list(error_resp_dict.keys()):
             # set the action_result status to error, the handler function
             # will most probably return as is
-            return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERROR_FROM_SERVER, status=response.status_code,
-                                             detail=error_resp_dict[response.status_code]),
-                    resp_data)
+            return (
+                action_result.set_status(
+                    phantom.APP_ERROR, PHISHME_ERROR_FROM_SERVER, status=response.status_code, detail=error_resp_dict[response.status_code]
+                ),
+                resp_data,
+            )
 
         # Return code 404 is not considered as failed action.
         # The requested resource is unavailable
         if response.status_code == PHISHME_REST_RESP_RESOURCE_NOT_FOUND:
             return phantom.APP_SUCCESS, {PHISHME_JSON_RESOURCE_NOT_FOUND: True}
 
-        content_type = response.headers['content-type']
-        if content_type.find('json') != -1:
+        content_type = response.headers["content-type"]
+        if content_type.find("json") != -1:
             try:
                 resp_data = response.json()
             except Exception as e:
-                return (action_result.set_status(
-                    phantom.APP_ERROR,
-                    PHISHME_ERROR_JSON_PARSE.format(raw_text=response.text),
-                    e), resp_data)
+                return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERROR_JSON_PARSE.format(raw_text=response.text), e), resp_data)
         else:
             resp_data = response.text
 
@@ -181,16 +170,14 @@ class PhishMeConnector(BaseConnector):
 
         # set the action_result status to error, the handler function
         # will most probably return as is
-        return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERROR_FROM_SERVER, status=response.status_code,
-                                         detail=message), resp_data)
+        return (action_result.set_status(phantom.APP_ERROR, PHISHME_ERROR_FROM_SERVER, status=response.status_code, detail=message), resp_data)
 
     # Function to test connectivity of asset
     def _test_asset_connectivity(self, param):
-
         action_result = ActionResult()
         self.save_progress(PHISHME_CONNECTION_TEST_MSG)
 
-        params = {'threatType': 'malware'}
+        params = {"threatType": "malware"}
 
         return_value, json_resp = self._make_rest_call(PHISHME_ENDPOINT, action_result, params=params)
 
@@ -207,10 +194,9 @@ class PhishMeConnector(BaseConnector):
     # Use pagination to get list of all threats
     # Threats per page: 100
     def _threat_search(self, data, max_threat_cnt, action_result):
-
         # Considering results_per_page as 100
         results_per_page = 100
-        data.update({'resultsPerPage': results_per_page, 'threatType': 'malware'})
+        data.update({"resultsPerPage": results_per_page, "threatType": "malware"})
 
         aggr_resp = dict()
         last_page_index = int(max_threat_cnt / results_per_page)
@@ -223,7 +209,7 @@ class PhishMeConnector(BaseConnector):
         # Paginate through list of threats till maximum count is
         # reached or all threats retrieved
         for curr_page_index in range(last_page_index + 1):
-            data.update({'page': curr_page_index})
+            data.update({"page": curr_page_index})
 
             return_value, rest_resp = self._make_rest_call(PHISHME_ENDPOINT, action_result, params=data)
 
@@ -238,7 +224,7 @@ class PhishMeConnector(BaseConnector):
 
             if aggr_resp:
                 # Appending threats to available threat list
-                aggr_resp["data"]["threats"] += (rest_resp["data"]["threats"])
+                aggr_resp["data"]["threats"] += rest_resp["data"]["threats"]
                 aggr_resp["data"]["page"] = rest_resp["data"].get("page", aggr_resp["data"]["page"])
             else:
                 # During the first page index
@@ -261,18 +247,27 @@ class PhishMeConnector(BaseConnector):
 
     # Function to parse the json response and return the required data to dump in the action result.
     def _parse_response(self, json_resp, ioc_type=None, param_value=None):
-
         # Response structure
-        data_to_add = {'data': {'threats': []}}
+        data_to_add = {"data": {"threats": []}}
 
         # List of data keys that are common for all actions
-        required_keys = ['apiReportURL', 'campaignBrandSet', 'executiveSummary', 'firstPublished', 'hasReport',
-                         'id', 'label', 'lastPublished', 'malwareFamilySet', 'reportURL', 'threatDetailURL',
-                         'threatType']
+        required_keys = [
+            "apiReportURL",
+            "campaignBrandSet",
+            "executiveSummary",
+            "firstPublished",
+            "hasReport",
+            "id",
+            "label",
+            "lastPublished",
+            "malwareFamilySet",
+            "reportURL",
+            "threatDetailURL",
+            "threatType",
+        ]
 
         # Action specific ioc keys
-        action_ioc_keys = {'hunt_file': ['executableSet'], 'hunt_ip': ['blockSet'],
-                           'hunt_url': ['blockSet'], 'hunt_domain': ['blockSet']}
+        action_ioc_keys = {"hunt_file": ["executableSet"], "hunt_ip": ["blockSet"], "hunt_url": ["blockSet"], "hunt_domain": ["blockSet"]}
 
         # Get action name
         action_name = self.get_action_identifier()
@@ -282,25 +277,25 @@ class PhishMeConnector(BaseConnector):
             required_keys += action_ioc_keys[action_name]
 
         # Iterate over every threat in the json response
-        for threat in json_resp['data']['threats']:
+        for threat in json_resp["data"]["threats"]:
             # Dict to dump the required threat details
             threat_dict = {}
             # Iterate over the list of keys in required_keys list
             for required_key in required_keys:
                 # Include only those blockSet that are related to the action (for hunt ip, url and domain actions)
-                if required_key == 'blockSet':
+                if required_key == "blockSet":
                     ioc_details = []
-                    if threat.get('blockSet'):
-                        for block_set in threat['blockSet']:
-                            if block_set.get('blockType') == ioc_type and block_set.get('data') == param_value:
+                    if threat.get("blockSet"):
+                        for block_set in threat["blockSet"]:
+                            if block_set.get("blockType") == ioc_type and block_set.get("data") == param_value:
                                 ioc_details.append(block_set)
                         threat_dict[required_key] = ioc_details
                 # Add executableSet in data in case of hunt file action
-                elif required_key == 'executableSet':
+                elif required_key == "executableSet":
                     file_details = []
-                    if threat.get('executableSet'):
-                        for executable_set in threat['executableSet']:
-                            if executable_set.get('md5Hex') == param_value:
+                    if threat.get("executableSet"):
+                        for executable_set in threat["executableSet"]:
+                            if executable_set.get("md5Hex") == param_value:
                                 file_details.append(executable_set)
                         threat_dict[required_key] = file_details
                 # Add other set of required keys that are common for all actions
@@ -308,7 +303,7 @@ class PhishMeConnector(BaseConnector):
                     if threat.get(required_key):
                         threat_dict[required_key] = threat[required_key]
             # Add dictionary containing threat details to the threat list
-            data_to_add['data']['threats'].append(threat_dict)
+            data_to_add["data"]["threats"].append(threat_dict)
 
         # return data to dump into action result
         return data_to_add
@@ -316,7 +311,6 @@ class PhishMeConnector(BaseConnector):
     # Function to get threats associated with file hash provided
     # Number of threats to get can be restricted based on max_threat_cnt parameter
     def _hunt_file(self, param):
-
         action_result = self.add_action_result(ActionResult(dict(param)))
         summary_data = action_result.update_summary({})
 
@@ -326,7 +320,7 @@ class PhishMeConnector(BaseConnector):
         # Getting optional parameter
         max_threat_cnt = int(param.get(PHISHME_JSON_MAX_THREAT_COUNT, PHISHME_DEFAULT_MAX_THREAT_COUNT))
 
-        data = {'allMD5': filehash}
+        data = {"allMD5": filehash}
 
         return_value, json_resp = self._threat_search(data, max_threat_cnt, action_result)
 
@@ -345,14 +339,13 @@ class PhishMeConnector(BaseConnector):
         action_result.add_data(data_to_add)
         total_threats = len(json_resp["data"]["threats"])
 
-        summary_data['total_threats'] = total_threats
+        summary_data["total_threats"] = total_threats
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     # Function to get threats associated with url provided
     # Number of threats to get can be restricted based on max_threat_cnt parameter
     def _hunt_url(self, param):
-
         action_result = self.add_action_result(ActionResult(dict(param)))
         summary_data = action_result.update_summary({})
 
@@ -362,7 +355,7 @@ class PhishMeConnector(BaseConnector):
         # Getting optional parameter
         max_threat_cnt = int(param.get(PHISHME_JSON_MAX_THREAT_COUNT, PHISHME_DEFAULT_MAX_THREAT_COUNT))
 
-        data = {'urlSearch': url}
+        data = {"urlSearch": url}
 
         return_value, json_resp = self._threat_search(data, max_threat_cnt, action_result)
 
@@ -376,19 +369,18 @@ class PhishMeConnector(BaseConnector):
         if not json_resp or not json_resp["data"]["threats"]:
             return action_result.set_status(phantom.APP_SUCCESS, PHISHME_REST_RESP_RESOURCE_NOT_FOUND_MSG)
 
-        data_to_add = self._parse_response(json_resp, ioc_type='URL', param_value=url)
+        data_to_add = self._parse_response(json_resp, ioc_type="URL", param_value=url)
 
         action_result.add_data(data_to_add)
         total_threats = len(json_resp["data"]["threats"])
 
-        summary_data['total_threats'] = total_threats
+        summary_data["total_threats"] = total_threats
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     # Function to get threats associated with IPv4 Address provided
     # Number of threats to get can be restricted based on max_threat_cnt parameter
     def _hunt_ip(self, param):
-
         action_result = self.add_action_result(ActionResult(dict(param)))
         summary_data = action_result.update_summary({})
 
@@ -398,7 +390,7 @@ class PhishMeConnector(BaseConnector):
         # Getting optional parameters
         max_threat_cnt = int(param.get(PHISHME_JSON_MAX_THREAT_COUNT, PHISHME_DEFAULT_MAX_THREAT_COUNT))
 
-        data = {'ip': ip}
+        data = {"ip": ip}
 
         return_value, json_resp = self._threat_search(data, max_threat_cnt, action_result)
 
@@ -412,19 +404,18 @@ class PhishMeConnector(BaseConnector):
         if not json_resp or not json_resp["data"]["threats"]:
             return action_result.set_status(phantom.APP_SUCCESS, PHISHME_REST_RESP_RESOURCE_NOT_FOUND_MSG)
 
-        data_to_add = self._parse_response(json_resp, ioc_type='IPv4 Address', param_value=ip)
+        data_to_add = self._parse_response(json_resp, ioc_type="IPv4 Address", param_value=ip)
 
         action_result.add_data(data_to_add)
         total_threats = len(json_resp["data"]["threats"])
 
-        summary_data['total_threats'] = total_threats
+        summary_data["total_threats"] = total_threats
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     # Function to get threats associated with domain name provided
     # Number of threats to get can be restricted based on max_threat_cnt parameter
     def _hunt_domain(self, param):
-
         action_result = self.add_action_result(ActionResult(dict(param)))
         summary_data = action_result.update_summary({})
 
@@ -438,7 +429,7 @@ class PhishMeConnector(BaseConnector):
         # Getting optional parameter
         max_threat_cnt = int(param.get(PHISHME_JSON_MAX_THREAT_COUNT, PHISHME_DEFAULT_MAX_THREAT_COUNT))
 
-        data = {'domain': domain}
+        data = {"domain": domain}
 
         return_value, json_resp = self._threat_search(data, max_threat_cnt, action_result)
 
@@ -453,60 +444,50 @@ class PhishMeConnector(BaseConnector):
             return action_result.set_status(phantom.APP_SUCCESS, PHISHME_REST_RESP_RESOURCE_NOT_FOUND_MSG)
 
         # Get the required data to dump in action result
-        data_to_add = self._parse_response(json_resp, ioc_type='Domain Name', param_value=domain)
+        data_to_add = self._parse_response(json_resp, ioc_type="Domain Name", param_value=domain)
 
         action_result.add_data(data_to_add)
         total_threats = len(json_resp["data"]["threats"])
 
-        summary_data['total_threats'] = total_threats
+        summary_data["total_threats"] = total_threats
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     # Function to generate report of threat ID provided
     def _get_report(self, param):
-
         action_result = self.add_action_result(ActionResult(dict(param)))
         summary_data = action_result.update_summary({})
 
         # Getting mandatory input params
-        threat_id = param['threat_id']
+        threat_id = param["threat_id"]
 
-        return_value, json_resp = self._make_rest_call(PHISHME_ENDPOINT_GET_REPORT_MALWARE + str(threat_id),
-                                                       action_result, method="get")
+        return_value, json_resp = self._make_rest_call(PHISHME_ENDPOINT_GET_REPORT_MALWARE + str(threat_id), action_result, method="get")
 
         # Something went wrong with the request
         if phantom.is_fail(return_value):
-            self.debug_print(PHISHME_THREAT_DATA_ERROR.format(id=param["threat_id"],
-                                                              message=action_result.get_message()))
+            self.debug_print(PHISHME_THREAT_DATA_ERROR.format(id=param["threat_id"], message=action_result.get_message()))
             return action_result.get_status()
 
         # Resource not found is treated as app success
         if json_resp.get(PHISHME_JSON_RESOURCE_NOT_FOUND):
-            return action_result.set_status(
-                phantom.APP_SUCCESS,
-                PHISHME_REST_RESP_RESOURCE_NOT_FOUND_MSG
-            )
+            return action_result.set_status(phantom.APP_SUCCESS, PHISHME_REST_RESP_RESOURCE_NOT_FOUND_MSG)
 
         action_result.add_data(json_resp)
 
-        summary_data['threat_type'] = json_resp['data']['threatType']
-        summary_data['threat_label'] = json_resp['data']['label']
+        summary_data["threat_type"] = json_resp["data"]["threatType"]
+        summary_data["threat_label"] = json_resp["data"]["label"]
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     # Function to create containers and artifacts
     def _ingest_threat_data(self, endpoint, threat_id):
-
         # Not adding action_result to base connector, use this object for rest calls only
         # even if individual threat ingestion fails, ingestion should continue for other threats
         action_result = ActionResult()
         container = {}
 
         # dictionary used to determine severity of artifacts
-        phantom_severity_mapping = {
-            "Major": "high",
-            "Moderate": "medium"
-        }
+        phantom_severity_mapping = {"Major": "high", "Moderate": "medium"}
 
         # Getting report details
         return_value, json_resp = self._make_rest_call(endpoint + threat_id, action_result, method="get")
@@ -526,26 +507,22 @@ class PhishMeConnector(BaseConnector):
         if json_resp.get("data"):
             container_details = {
                 "container_name": json_resp["data"].get("label"),
-                "container_description": json_resp["data"].get("executiveSummary")
+                "container_description": json_resp["data"].get("executiveSummary"),
             }
 
         # default value of name and description of container
         else:
             container_details = {
                 "container_name": "threat_" + str(threat_id),
-                "container_description": PHISHME_CONTAINER_DESC.format(
-                    str(threat_id)
-                )
+                "container_description": PHISHME_CONTAINER_DESC.format(str(threat_id)),
             }
 
         # Creating container
         container["name"] = container_details["container_name"]
         container["description"] = container_details["container_description"]
-        container['data'] = json_resp
-        container['source_data_identifier'] = threat_id
-        return_value, response, container_id = self.save_container(
-            container
-        )
+        container["data"] = json_resp
+        container["source_data_identifier"] = threat_id
+        return_value, response, container_id = self.save_container(container)
 
         # Something went wrong while creating container
         if phantom.is_fail(return_value):
@@ -568,7 +545,7 @@ class PhishMeConnector(BaseConnector):
             "sha256Hex": {"cef_name": "fileHashSha256", "cef_contains": ["hash", "sha256"]},
             "fileName": {"cef_name": "fileName", "cef_contains": ["file name"]},
             "type": {"cef_name": "fileType", "cef_contains": []},
-            "dateEntered": {"cef_name": "fileModificationTime", "cef_contains": []}
+            "dateEntered": {"cef_name": "fileModificationTime", "cef_contains": []},
         }
 
         response_data = json_resp["data"]
@@ -579,7 +556,6 @@ class PhishMeConnector(BaseConnector):
             cef = {}
             cef_types = {}
             for threat_data_key in list(executableset_cef_mapping.keys()):
-
                 cef_details = executableset_cef_mapping[threat_data_key]
 
                 # Adding cef if found from executableSet key
@@ -587,8 +563,7 @@ class PhishMeConnector(BaseConnector):
                     cef_value = executableset_data[threat_data_key]
                     # Converting date from epoch format to human readable format
                     if threat_data_key == "dateEntered":
-                        cef_value = datetime.fromtimestamp(
-                            int(cef_value) / 1000.0).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+                        cef_value = datetime.fromtimestamp(int(cef_value) / 1000.0).strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"
 
                     cef[cef_details["cef_name"]] = cef_value
                     cef_types[cef_details["cef_name"]] = cef_details["cef_contains"]
@@ -606,9 +581,8 @@ class PhishMeConnector(BaseConnector):
         # Value: {artifact name, cef name of value, contains for cef name}
         blockset_cef_mapping = {
             "IPv4 Address": {"artifact_name": "IP Artifact", "cef_name": "destinationAddress", "cef_contains": ["ip"]},
-            "Domain Name": {"artifact_name": "Domain Artifact", "cef_name": "destinationDnsDomain",
-                            "cef_contains": ["domain"]},
-            "URL": {"artifact_name": "URL Artifact", "cef_name": "requestURL", "cef_contains": ["url"]}
+            "Domain Name": {"artifact_name": "Domain Artifact", "cef_name": "destinationDnsDomain", "cef_contains": ["domain"]},
+            "URL": {"artifact_name": "URL Artifact", "cef_name": "requestURL", "cef_contains": ["url"]},
         }
 
         # creating artifacts from data in blockSet key.
@@ -616,16 +590,14 @@ class PhishMeConnector(BaseConnector):
         # Checking if value of blockType is any one of 'IPv4 Address', 'Domain Name' or 'URL'
         # Checking if impact key is present and its value must be 'Major' or 'Moderate'
         for blockset_data in response_data.get("blockSet", []):
-            if blockset_data.get('blockType') in blockset_cef_mapping and \
-                    blockset_data.get("impact") in ["Major", "Moderate"]:
+            if blockset_data.get("blockType") in blockset_cef_mapping and blockset_data.get("impact") in ["Major", "Moderate"]:
                 cef_details = blockset_cef_mapping[blockset_data["blockType"]]
 
                 cef = {cef_details["cef_name"]: blockset_data["data"]}
                 cef_types = {cef_details["cef_name"]: cef_details["cef_contains"]}
 
                 severity = phantom_severity_mapping[blockset_data.get("impact")]
-                return_value, artifact = self._create_artifact(cef_details["artifact_name"],
-                                                               cef, cef_types, container_id, severity)
+                return_value, artifact = self._create_artifact(cef_details["artifact_name"], cef, cef_types, container_id, severity)
 
                 # Something went wrong while creating artifacts
                 # continue creating next artifact
@@ -649,7 +621,6 @@ class PhishMeConnector(BaseConnector):
 
     # Function to ingest new threat updates in phantom environment
     def _on_poll(self, param):
-
         action_result = self.add_action_result(ActionResult(dict(param)))
         next_position = None
 
@@ -669,20 +640,20 @@ class PhishMeConnector(BaseConnector):
             start_time = int(time.time()) - (86400 * num_days)
 
             if not source_id:
-                self.save_progress("Getting updates for last {} day(s)".format(str(num_days)))
+                self.save_progress(f"Getting updates for last {num_days!s} day(s)")
 
         # Code to ingest data by scheduled polling for the first time
-        elif self._state.get('first_run', True):
-            self._state['first_run'] = False
+        elif self._state.get("first_run", True):
+            self._state["first_run"] = False
             num_days = int(self._first_ingestion_span)
 
             start_time = int(time.time() - (86400 * num_days))
-            self.debug_print("Getting updates for last {} day(s)".format(str(num_days)))
+            self.debug_print(f"Getting updates for last {num_days!s} day(s)")
 
         # Code to ingest data by scheduled polling after first time
         else:
-            next_position = str(self._state.get('next_position'))
-            self.debug_print("Getting updates for last {} day(s)".format(str(next_position)))
+            next_position = str(self._state.get("next_position"))
+            self.debug_print(f"Getting updates for last {next_position!s} day(s)")
 
         if next_position:
             rest_params = {"position": next_position}
@@ -698,38 +669,38 @@ class PhishMeConnector(BaseConnector):
             return action_result.get_status()
 
         for threat_index in range(0, len(threat_list)):
-
             threat_type = threat_list[threat_index]["threatType"]
             threat_id = str(threat_list[threat_index]["threatId"])
 
             if threat_type == "malware":
                 endpoint = PHISHME_ENDPOINT_GET_REPORT_MALWARE
 
-                self.send_progress("Ingesting data for threat # {0} ID {1}".format(threat_index + 1, str(threat_id)))
+                self.send_progress(f"Ingesting data for threat # {threat_index + 1} ID {threat_id!s}")
 
                 # Even if ingest_threat_data fails, continue to next threat data ingestion
-                self._ingest_threat_data(
-                    endpoint,
-                    str(threat_id)
-                )
+                self._ingest_threat_data(endpoint, str(threat_id))
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
     # Function to create artifacts based on the details provided
     def _create_artifact(self, artifact_name, cef, cef_types, container_id, severity=None):
-
         # Threat Artifact is the last artifact to be created for any contianer
-        artifact = {'name': artifact_name, "description": PHISHME_ARTIFACTS_DESC, "cef_types": cef_types, 'cef': cef,
-                    'container_id': container_id}
+        artifact = {
+            "name": artifact_name,
+            "description": PHISHME_ARTIFACTS_DESC,
+            "cef_types": cef_types,
+            "cef": cef,
+            "container_id": container_id,
+        }
 
         if artifact_name == "Threat Artifact":
-            artifact.update({'run_automation': True})
+            artifact.update({"run_automation": True})
 
         if severity:
             artifact["severity"] = severity
 
         # The source_data_identifier should be created _after_ all the keys have been set.
-        artifact['source_data_identifier'] = self._create_dict_hash(artifact)
+        artifact["source_data_identifier"] = self._create_dict_hash(artifact)
 
         return_value, status_string, artifact_id = self.save_artifact(artifact)
 
@@ -743,27 +714,24 @@ class PhishMeConnector(BaseConnector):
     # Function used to sort threat list in descending order, and deleting duplicate entries
     # from the list based on 'threat id' and 'threat type'
     def _get_threat_updates(self, action_result, rest_params, source_id, container_count):
-
         threat_list = []
 
         # Fetching threat list for specific threat IDs
         if source_id:
             # Making list of all threat IDs and stripping spaces from values if present
             source_id_list = source_id.split(",")
-            source_id_list = [id.strip(' ') for id in source_id_list]
+            source_id_list = [id.strip(" ") for id in source_id_list]
 
             # params_list with all specific threat IDs to pass in the API
             params_list = []
 
             for id in source_id_list:
-                params_list = params_list + ["m_{}".format(str(id))]
+                params_list = [*params_list, f"m_{id!s}"]
 
             # Searching threat ID in the database to get its threat type
             # Endpoint used is /threat/search
             return_value, json_resp = self._make_rest_call(
-                PHISHME_ENDPOINT,
-                action_result,
-                params={"threatId": params_list, "threatType": "malware"}
+                PHISHME_ENDPOINT, action_result, params={"threatId": params_list, "threatType": "malware"}
             )
 
             # Something went wrong with the request
@@ -779,10 +747,7 @@ class PhishMeConnector(BaseConnector):
             for threat in json_resp["data"]["threats"]:
                 # Fetching threatType from the elements of threats list
                 # All the elements will have same threat type
-                threat_list.append({
-                    "threatId": threat["id"],
-                    "threatType": str(threat.get("threatType")).lower()
-                })
+                threat_list.append({"threatId": threat["id"], "threatType": str(threat.get("threatType")).lower()})
 
             return phantom.APP_SUCCESS, threat_list
 
@@ -799,22 +764,22 @@ class PhishMeConnector(BaseConnector):
         # If threat updates are available, the unique list of threat updates
         # will be sorted based on 'occurredOn' parameter
         if change_log:
-            threat_list = list({
-                (threat_detail['threatId'], threat_detail["threatType"]): threat_detail for threat_detail in change_log
-            }.values())
+            threat_list = list(
+                {(threat_detail["threatId"], threat_detail["threatType"]): threat_detail for threat_detail in change_log}.values()
+            )
 
             threat_list.sort(key=lambda x: x["occurredOn"])
 
         # Filtering out the threats which are deleted from database
         # threat_list = filter(lambda x: x['deleted'] is False, threat_list)
-        threat_list = [x for x in threat_list if x['deleted'] is False and x['threatType'] == 'malware']
+        threat_list = [x for x in threat_list if x["deleted"] is False and x["threatType"] == "malware"]
 
-        self.save_progress("{} malware threat update(s) retrieved".format(str(len(threat_list))))
+        self.save_progress(f"{len(threat_list)!s} malware threat update(s) retrieved")
 
         # Get the next position and save its state during scheduled polling
         if not self.is_poll_now():
             self.debug_print("Saving next_position parameter for next polling")
-            self._state['next_position'] = str(json_resp["data"]["nextPosition"])
+            self._state["next_position"] = str(json_resp["data"]["nextPosition"])
 
         total_containers = container_count
         if container_count > len(threat_list):
@@ -834,14 +799,13 @@ class PhishMeConnector(BaseConnector):
 
         fips_enabled = is_fips_enabled()
         if fips_enabled:
-            self.debug_print('FIPS is enabled')
+            self.debug_print("FIPS is enabled")
         else:
-            self.debug_print('FIPS is not enabled')
+            self.debug_print("FIPS is not enabled")
         return fips_enabled
 
     # Function used to generate hash value of the data provided
     def _create_dict_hash(self, input_dict):
-
         input_dict_str = None
 
         if not input_dict:
@@ -851,7 +815,7 @@ class PhishMeConnector(BaseConnector):
             input_dict_str = json.dumps(input_dict, sort_keys=True)
         except Exception as e:
             print(str(e))
-            self.debug_print('Handled exception in _create_dict_hash', e)
+            self.debug_print("Handled exception in _create_dict_hash", e)
             return None
 
         fips_enabled = self._get_fips_enabled()
@@ -861,14 +825,14 @@ class PhishMeConnector(BaseConnector):
         return hashlib.sha256(input_dict_str.encode()).hexdigest()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import sys
 
     import pudb
 
     pudb.set_trace()
     if len(sys.argv) < 2:
-        print('No test json specified as input')
+        print("No test json specified as input")
         sys.exit(0)
     with open(sys.argv[1]) as f:
         in_json = f.read()
