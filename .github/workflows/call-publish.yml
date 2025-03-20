@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main  # Runs only on push (merge) to main
-      - mnordby./test
+      - mnordby/test
 
 jobs:
   call-publish:
