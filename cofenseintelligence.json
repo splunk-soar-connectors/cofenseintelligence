@@ -16,7 +16,7 @@
     "fips_compliant": true,
     "logo": "logo_cofenseintelligence.svg",
     "logo_dark": "logo_cofenseintelligence_dark.svg",
-    "python_version": "3",
+    "python_version": ["3.9", "3.13"],
     "latest_tested_versions": [
         "Cloud API v1 tested on 30/03/2021"
     ],
