@@ -7,8 +7,8 @@
     "type": "investigative",
     "license": "Copyright (c) 2020-2025 Splunk Inc.",
     "main_module": "cofenseintelligence_connector.py",
-    "app_version": "2.0.7",
-    "utctime_updated": "2025-04-14T20:43:58.147476Z",
+    "app_version": "2.0.8",
+    "utctime_updated": "2025-07-30T17:37:43.728361Z",
     "product_vendor": "Cofense",
     "product_name": "Cofense Intelligence",
     "product_version_regex": ".*",
@@ -16,7 +16,10 @@
     "fips_compliant": true,
     "logo": "logo_cofenseintelligence.svg",
     "logo_dark": "logo_cofenseintelligence_dark.svg",
-    "python_version": ["3.9", "3.13"],
+    "python_version": [
+        "3.9",
+        "3.13"
+    ],
     "latest_tested_versions": [
         "Cloud API v1 tested on 30/03/2021"
     ],
