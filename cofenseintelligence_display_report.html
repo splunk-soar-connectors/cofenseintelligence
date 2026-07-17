@@ -124,10 +124,10 @@ and limitations under the License.
     </br>
     <div class="container">
       {% if result.report.threatType == 'MALWARE' %}
-        {% if result.report.hasReport %}
+        {% if result.report.hasReport and result.report.reportURL %}
           <div class="left-align">
             <h5>
-              Active Threat Report [<a href="{{ result.report.reportURL }}">HTML</a>]
+              Active Threat Report [<a href="{{ result.report.reportURL }}" target="_blank" rel="noopener noreferrer">HTML</a>]
             </h5>
           </div>
         {% endif %}
@@ -177,10 +177,12 @@ and limitations under the License.
         <h5>Last Date: {{ result.report.lastPublished }}</h5>
       </div>
     {% elif result.report.threatType == 'PHISH' %}
-      {% if result.report.screenshot %}
+      {% if result.report.screenshot.url %}
         <div class="left-align">
           <h5>
-            Screenshot [<a href="{{ result.report.screenshot.url }}">{{ result.report.screenshot.url }}</a>]
+            Screenshot [<a href="{{ result.report.screenshot.url }}"
+    target="_blank"
+    rel="noopener noreferrer">{{ result.report.screenshot.url }}</a>]
           </h5>
         </div>
       {% endif %}
