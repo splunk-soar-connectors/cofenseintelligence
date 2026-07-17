@@ -18,6 +18,7 @@
 import hashlib
 import json
 import time
+import urllib.parse
 from datetime import datetime
 
 import phantom.app as phantom
@@ -28,6 +29,16 @@ from phantom.base_connector import BaseConnector
 
 # Local imports
 from cofenseintelligence_consts import *
+
+
+def _normalize_threat_id(value):
+    try:
+        threat_id = int(value)
+    except (TypeError, ValueError) as e:
+        raise ValueError("Threat ID must be an integer") from e
+    if threat_id < 0:
+        raise ValueError("Threat ID must be non-negative")
+    return urllib.parse.quote(str(threat_id), safe="")
 
 
 class PhishMeConnector(BaseConnector):
@@ -459,7 +470,10 @@ class PhishMeConnector(BaseConnector):
         summary_data = action_result.update_summary({})
 
         # Getting mandatory input params
-        threat_id = param["threat_id"]
+        try:
+            threat_id = _normalize_threat_id(param["threat_id"])
+        except ValueError as e:
+            return action_result.set_status(phantom.APP_ERROR, str(e))
 
         return_value, json_resp = self._make_rest_call(PHISHME_ENDPOINT_GET_REPORT_MALWARE + str(threat_id), action_result, method="get")
 
@@ -488,6 +502,12 @@ class PhishMeConnector(BaseConnector):
 
         # dictionary used to determine severity of artifacts
         phantom_severity_mapping = {"Major": "high", "Moderate": "medium"}
+
+        try:
+            threat_id = _normalize_threat_id(threat_id)
+        except ValueError as e:
+            self.debug_print(f"Unable to ingest threat: {e}")
+            return phantom.APP_ERROR
 
         # Getting report details
         return_value, json_resp = self._make_rest_call(endpoint + threat_id, action_result, method="get")
