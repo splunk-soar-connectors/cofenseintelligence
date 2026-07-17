@@ -11,7 +11,7 @@
 {% block widget_content %}
   <!-- Main Start Block -->
   <!-- File: cofenseintelligence_display_report.html
-Copyright (c) 2020-2025 Splunk Inc.
+Copyright (c) 2020-2026 Splunk Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -127,7 +127,9 @@ and limitations under the License.
         {% if result.report.hasReport and result.report.reportURL %}
           <div class="left-align">
             <h5>
-              Active Threat Report [<a href="{{ result.report.reportURL }}" target="_blank" rel="noopener noreferrer">HTML</a>]
+              Active Threat Report [<a href="{{ result.report.reportURL }}"
+   target="_blank"
+   rel="noopener noreferrer">HTML</a>]
             </h5>
           </div>
         {% endif %}
@@ -181,8 +183,8 @@ and limitations under the License.
         <div class="left-align">
           <h5>
             Screenshot [<a href="{{ result.report.screenshot.url }}"
-    target="_blank"
-    rel="noopener noreferrer">{{ result.report.screenshot.url }}</a>]
+   target="_blank"
+   rel="noopener noreferrer">{{ result.report.screenshot.url }}</a>]
           </h5>
         </div>
       {% endif %}
