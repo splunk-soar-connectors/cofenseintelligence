@@ -1,6 +1,6 @@
 # File: cofenseintelligence_view.py
 #
-# Copyright (c) 2020-2025 Splunk Inc.
+# Copyright (c) 2020-2026 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,16 @@
 #
 # Local imports
 import time
+import urllib.parse
+
+
+def _safe_external_url(value):
+    if not isinstance(value, str):
+        return None
+    parsed = urllib.parse.urlsplit(value)
+    if parsed.scheme.lower() not in {"http", "https"} or not parsed.netloc:
+        return None
+    return value
 
 
 # Function to parse time in human readable format
@@ -44,6 +54,9 @@ def get_ctx_result(result):
         return ctx_result
 
     data = parse_data(data)
+    data["reportURL"] = _safe_external_url(data.get("reportURL"))
+    if isinstance(data.get("screenshot"), dict):
+        data["screenshot"]["url"] = _safe_external_url(data["screenshot"].get("url"))
 
     ctx_result["report"] = data
     return ctx_result

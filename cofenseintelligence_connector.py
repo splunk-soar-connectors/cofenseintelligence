@@ -1,6 +1,6 @@
 # File: cofenseintelligence_connector.py
 #
-# Copyright (c) 2020-2025 Splunk Inc.
+# Copyright (c) 2020-2026 Splunk Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 import hashlib
 import json
 import time
+import urllib.parse
 from datetime import datetime
 
 import phantom.app as phantom
@@ -28,6 +29,16 @@ from phantom.base_connector import BaseConnector
 
 # Local imports
 from cofenseintelligence_consts import *
+
+
+def _normalize_threat_id(value):
+    try:
+        threat_id = int(value)
+    except (TypeError, ValueError) as e:
+        raise ValueError("Threat ID must be an integer") from e
+    if threat_id < 0:
+        raise ValueError("Threat ID must be non-negative")
+    return urllib.parse.quote(str(threat_id), safe="")
 
 
 class PhishMeConnector(BaseConnector):
@@ -459,7 +470,10 @@ class PhishMeConnector(BaseConnector):
         summary_data = action_result.update_summary({})
 
         # Getting mandatory input params
-        threat_id = param["threat_id"]
+        try:
+            threat_id = _normalize_threat_id(param["threat_id"])
+        except ValueError as e:
+            return action_result.set_status(phantom.APP_ERROR, str(e))
 
         return_value, json_resp = self._make_rest_call(PHISHME_ENDPOINT_GET_REPORT_MALWARE + str(threat_id), action_result, method="get")
 
@@ -488,6 +502,12 @@ class PhishMeConnector(BaseConnector):
 
         # dictionary used to determine severity of artifacts
         phantom_severity_mapping = {"Major": "high", "Moderate": "medium"}
+
+        try:
+            threat_id = _normalize_threat_id(threat_id)
+        except ValueError as e:
+            self.debug_print(f"Unable to ingest threat: {e}")
+            return phantom.APP_ERROR
 
         # Getting report details
         return_value, json_resp = self._make_rest_call(endpoint + threat_id, action_result, method="get")
@@ -644,7 +664,6 @@ class PhishMeConnector(BaseConnector):
 
         # Code to ingest data by scheduled polling for the first time
         elif self._state.get("first_run", True):
-            self._state["first_run"] = False
             num_days = int(self._first_ingestion_span)
 
             start_time = int(time.time() - (86400 * num_days))
@@ -652,8 +671,14 @@ class PhishMeConnector(BaseConnector):
 
         # Code to ingest data by scheduled polling after first time
         else:
-            next_position = str(self._state.get("next_position"))
-            self.debug_print(f"Getting updates for last {next_position!s} day(s)")
+            next_position = self._state.get("next_position")
+            if next_position is None:
+                num_days = int(self._num_days)
+                start_time = int(time.time()) - (86400 * num_days)
+                self.debug_print("No saved update position found; falling back to the timestamp window")
+            else:
+                next_position = str(next_position)
+                self.debug_print(f"Getting updates from position {next_position!s}")
 
         if next_position:
             rest_params = {"position": next_position}
@@ -661,13 +686,14 @@ class PhishMeConnector(BaseConnector):
             rest_params = {"timestamp": start_time}
 
         # getting formatted threat list based on the 'container count'
-        return_value, threat_list = self._get_threat_updates(action_result, rest_params, source_id, container_count)
+        return_value, threat_list, fetched_next_position = self._get_threat_updates(action_result, rest_params, source_id, container_count)
 
         # Something went wrong with the request
         if phantom.is_fail(return_value):
             self.debug_print(action_result.get_message())
             return action_result.get_status()
 
+        failed_count = 0
         for threat_index in range(0, len(threat_list)):
             threat_type = threat_list[threat_index]["threatType"]
             threat_id = str(threat_list[threat_index]["threatId"])
@@ -678,7 +704,19 @@ class PhishMeConnector(BaseConnector):
                 self.send_progress(f"Ingesting data for threat # {threat_index + 1} ID {threat_id!s}")
 
                 # Even if ingest_threat_data fails, continue to next threat data ingestion
-                self._ingest_threat_data(endpoint, str(threat_id))
+                ingest_status = self._ingest_threat_data(endpoint, str(threat_id))
+                if phantom.is_fail(ingest_status):
+                    failed_count += 1
+
+        action_result.update_summary({"total_threats": len(threat_list), "failed_threats": failed_count})
+        if failed_count:
+            return action_result.set_status(phantom.APP_ERROR, f"Failed to ingest {failed_count} threat(s); poll checkpoint was not advanced")
+
+        if not self.is_poll_now():
+            if fetched_next_position is not None:
+                self._state["next_position"] = str(fetched_next_position)
+            self._state["first_run"] = False
+            self.save_state(self._state)
 
         return action_result.set_status(phantom.APP_SUCCESS)
 
@@ -715,6 +753,7 @@ class PhishMeConnector(BaseConnector):
     # from the list based on 'threat id' and 'threat type'
     def _get_threat_updates(self, action_result, rest_params, source_id, container_count):
         threat_list = []
+        next_position = None
 
         # Fetching threat list for specific threat IDs
         if source_id:
@@ -736,12 +775,12 @@ class PhishMeConnector(BaseConnector):
 
             # Something went wrong with the request
             if phantom.is_fail(return_value):
-                return action_result.get_status(), threat_list
+                return action_result.get_status(), threat_list, next_position
 
             # Given source ID not found in the database
             if not json_resp["data"]["threats"]:
                 self.save_progress("Requested threat ID is not available in the Cofense Intelligence database")
-                return phantom.APP_SUCCESS, threat_list
+                return phantom.APP_SUCCESS, threat_list, next_position
 
             # Making a list of all threat IDs and its threatType to generate report
             for threat in json_resp["data"]["threats"]:
@@ -749,7 +788,7 @@ class PhishMeConnector(BaseConnector):
                 # All the elements will have same threat type
                 threat_list.append({"threatId": threat["id"], "threatType": str(threat.get("threatType")).lower()})
 
-            return phantom.APP_SUCCESS, threat_list
+            return phantom.APP_SUCCESS, threat_list, next_position
 
         # getting threat updates
         # Endpoint used is /threat/updates
@@ -757,7 +796,7 @@ class PhishMeConnector(BaseConnector):
 
         # Something went wrong with the request
         if phantom.is_fail(return_value):
-            return action_result.get_status(), threat_list
+            return action_result.get_status(), threat_list, next_position
 
         change_log = json_resp["data"]["changelog"]
 
@@ -776,20 +815,13 @@ class PhishMeConnector(BaseConnector):
 
         self.save_progress(f"{len(threat_list)!s} malware threat update(s) retrieved")
 
-        # Get the next position and save its state during scheduled polling
-        if not self.is_poll_now():
-            self.debug_print("Saving next_position parameter for next polling")
-            self._state["next_position"] = str(json_resp["data"]["nextPosition"])
+        next_position = json_resp["data"].get("nextPosition")
 
-        total_containers = container_count
-        if container_count > len(threat_list):
-            total_containers = len(threat_list)
-            self.save_progress("The total number of threat update retrieved is less than maximum containers count")
+        if self.is_poll_now():
+            total_containers = min(container_count, len(threat_list))
+            threat_list = threat_list[-total_containers:] if total_containers else []
 
-        # filtering the threat list based on maximum container count given
-        threat_list = threat_list[-total_containers:]
-
-        return phantom.APP_SUCCESS, threat_list
+        return phantom.APP_SUCCESS, threat_list, next_position
 
     def _get_fips_enabled(self):
         try:

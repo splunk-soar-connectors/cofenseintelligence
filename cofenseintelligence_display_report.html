@@ -11,7 +11,7 @@
 {% block widget_content %}
   <!-- Main Start Block -->
   <!-- File: cofenseintelligence_display_report.html
-Copyright (c) 2020-2025 Splunk Inc.
+Copyright (c) 2020-2026 Splunk Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -124,10 +124,12 @@ and limitations under the License.
     </br>
     <div class="container">
       {% if result.report.threatType == 'MALWARE' %}
-        {% if result.report.hasReport %}
+        {% if result.report.hasReport and result.report.reportURL %}
           <div class="left-align">
             <h5>
-              Active Threat Report [<a href="{{ result.report.reportURL }}">HTML</a>]
+              Active Threat Report [<a href="{{ result.report.reportURL }}"
+   target="_blank"
+   rel="noopener noreferrer">HTML</a>]
             </h5>
           </div>
         {% endif %}
@@ -177,10 +179,12 @@ and limitations under the License.
         <h5>Last Date: {{ result.report.lastPublished }}</h5>
       </div>
     {% elif result.report.threatType == 'PHISH' %}
-      {% if result.report.screenshot %}
+      {% if result.report.screenshot.url %}
         <div class="left-align">
           <h5>
-            Screenshot [<a href="{{ result.report.screenshot.url }}">{{ result.report.screenshot.url }}</a>]
+            Screenshot [<a href="{{ result.report.screenshot.url }}"
+   target="_blank"
+   rel="noopener noreferrer">{{ result.report.screenshot.url }}</a>]
           </h5>
         </div>
       {% endif %}
@@ -237,7 +241,7 @@ and limitations under the License.
           <tr>
             <td>
               <a href="javascript:;"
-                 onclick="context_menu(this, [{'contains': ['domain'], 'value': '{{ domainset.domain }}' }], 0, {{ container.id }}, null, false);">
+                 onclick="context_menu(this, [{'contains': ['domain'], 'value': '{{ domainset.domain|escapejs }}' }], 0, {{ container.id }}, null, false);">
                 {{ domainset.domain }}
                 &nbsp;
                 <span class="fa fa-caret-down" style="font-size: smaller;"></span>
@@ -266,7 +270,7 @@ and limitations under the License.
           <tr>
             <td>
               <a href="javascript:;"
-                 onclick="context_menu(this, [{'contains': ['email'], 'value': '{{ mailset.senderEmail }}' }], 0, {{ container.id }}, null, false);">
+                 onclick="context_menu(this, [{'contains': ['email'], 'value': '{{ mailset.senderEmail|escapejs }}' }], 0, {{ container.id }}, null, false);">
                 {{ mailset.senderEmail }}
                 &nbsp;
                 <span class="fa fa-caret-down" style="font-size: smaller;"></span>
@@ -295,7 +299,7 @@ and limitations under the License.
           <tr>
             <td>
               <a href="javascript:;"
-                 onclick="context_menu(this, [{'contains': ['ip'], 'value': '{{ senderSet.ip }}' }], 0, {{ container.id }}, null, false);">
+                 onclick="context_menu(this, [{'contains': ['ip'], 'value': '{{ senderSet.ip|escapejs }}' }], 0, {{ container.id }}, null, false);">
                 {{ senderSet.ip }}
                 &nbsp;
                 <span class="fa fa-caret-down" style="font-size: smaller;"></span>
@@ -373,7 +377,7 @@ and limitations under the License.
             <td>{{ execset.fileName }}</td>
             <td>
               <a href="javascript:;"
-                 onclick="context_menu(this, [{'contains': ['md5'], 'value': '{{ execset.md5Hex }}' }], 0, {{ container.id }}, null, false);">
+                 onclick="context_menu(this, [{'contains': ['md5'], 'value': '{{ execset.md5Hex|escapejs }}' }], 0, {{ container.id }}, null, false);">
                 {{ execset.md5Hex }}
                 &nbsp;
                 <span class="fa fa-caret-down" style="font-size: smaller;"></span>
@@ -413,21 +417,21 @@ and limitations under the License.
             <td>
               {% if blockset.blockType == 'IPv4 Address' %}
                 <a href="javascript:;"
-                   onclick="context_menu(this, [{'contains': ['ip'], 'value': '{{ blockset.data }}' }], 0, {{ container.id }}, null, false);">
+                   onclick="context_menu(this, [{'contains': ['ip'], 'value': '{{ blockset.data|escapejs }}' }], 0, {{ container.id }}, null, false);">
                   {{ blockset.data }}
                   &nbsp;
                   <span class="fa fa-caret-down" style="font-size: smaller;"></span>
                 </a>
               {% elif blockset.blockType == 'URL' %}
                 <a href="javascript:;"
-                   onclick="context_menu(this, [{'contains': ['url'], 'value': '{{ blockset.data }}' }], 0, {{ container.id }}, null, false);">
+                   onclick="context_menu(this, [{'contains': ['url'], 'value': '{{ blockset.data|escapejs }}' }], 0, {{ container.id }}, null, false);">
                   {{ blockset.data }}
                   &nbsp;
                   <span class="fa fa-caret-down" style="font-size: smaller;"></span>
                 </a>
               {% elif blockset.blockType == 'Domain Name' %}
                 <a href="javascript:;"
-                   onclick="context_menu(this, [{'contains': ['domain'], 'value': '{{ blockset.data }}' }], 0, {{ container.id }}, null, false);">
+                   onclick="context_menu(this, [{'contains': ['domain'], 'value': '{{ blockset.data|escapejs }}' }], 0, {{ container.id }}, null, false);">
                   {{ blockset.data }}
                   &nbsp;
                   <span class="fa fa-caret-down" style="font-size: smaller;"></span>
@@ -470,7 +474,7 @@ and limitations under the License.
           <tr>
             <td>
               <a href="javascript:;"
-                 onclick="context_menu(this, [{'contains': ['url'], 'value': '{{ spamset.url }}' }], 0, {{ container.id }}, null, false);">
+                 onclick="context_menu(this, [{'contains': ['url'], 'value': '{{ spamset.url|escapejs }}' }], 0, {{ container.id }}, null, false);">
                 {{ spamset.url }}
                 &nbsp;
                 <span class="fa fa-caret-down" style="font-size: smaller;"></span>
@@ -519,7 +523,7 @@ and limitations under the License.
           <tr>
             <td>
               <a href="javascript:;"
-                 onclick="context_menu(this, [{'contains': ['url'], 'value': '{{ curr_url }}' }], 0, {{ container.id }}, null, false);">
+                 onclick="context_menu(this, [{'contains': ['url'], 'value': '{{ curr_url|escapejs }}' }], 0, {{ container.id }}, null, false);">
                 {{ curr_url }}
                 &nbsp;
                 <span class="fa fa-caret-down" style="font-size: smaller;"></span>
@@ -546,7 +550,7 @@ and limitations under the License.
           <tr>
             <td>
               <a href="javascript:;"
-                 onclick="context_menu(this, [{'contains': ['url'], 'value': '{{ curr_url }}' }], 0, {{ container.id }}, null, false);">
+                 onclick="context_menu(this, [{'contains': ['url'], 'value': '{{ curr_url|escapejs }}' }], 0, {{ container.id }}, null, false);">
                 {{ curr_url }}
                 &nbsp;
                 <span class="fa fa-caret-down" style="font-size: smaller;"></span>
@@ -567,7 +571,7 @@ and limitations under the License.
         <td>IP</td>
         <td>
           <a href="javascript:;"
-             onclick="context_menu(this, [{'contains': ['ip'], 'value': '{{ result.report.ipDetail.ip }}' }], 0, {{ container.id }}, null, false);">
+             onclick="context_menu(this, [{'contains': ['ip'], 'value': '{{ result.report.ipDetail.ip|escapejs }}' }], 0, {{ container.id }}, null, false);">
             {{ result.report.ipDetail.ip }}
             &nbsp;
             <span class="fa fa-caret-down" style="font-size: smaller;"></span>

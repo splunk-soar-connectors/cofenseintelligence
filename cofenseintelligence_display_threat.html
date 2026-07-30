@@ -11,7 +11,7 @@
 {% block widget_content %}
   <!-- Main Start Block -->
   <!-- File: cofenseintelligence_display_threat.html
-Copyright (c) 2020-2025 Splunk Inc.
+Copyright (c) 2020-2026 Splunk Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -101,7 +101,7 @@ and limitations under the License.
             <tr>
               <td>
                 <a href="javascript:;"
-                   onclick="context_menu(this, [{'contains': ['phishme threat id'], 'value': '{{ info.id }}' }], 0, {{ container.id }}, null, false);">
+                   onclick="context_menu(this, [{'contains': ['phishme threat id'], 'value': '{{ info.id|escapejs }}' }], 0, {{ container.id }}, null, false);">
                   {{ info.id }}
                   &nbsp;
                   <span class="fa fa-caret-down" style="font-size: smaller;"></span>
@@ -117,7 +117,7 @@ and limitations under the License.
                     {% for curr_file in info.executableSet %}
                       {% if curr_file.md5Hex %}
                         <a href="javascript:;"
-                           onclick="context_menu(this, [{'contains': ['md5'], 'value': '{{ curr_file.md5Hex }}' }], 0, {{ container.id }}, null, false);">
+                           onclick="context_menu(this, [{'contains': ['md5'], 'value': '{{ curr_file.md5Hex|escapejs }}' }], 0, {{ container.id }}, null, false);">
                           {{ curr_file.md5Hex }}
                           &nbsp;
                           <span class="fa fa-caret-down" style="font-size: smaller;"></span>
@@ -132,7 +132,7 @@ and limitations under the License.
                     {% for curr_file in info.executableSet %}
                       {% if curr_file.sha256Hex %}
                         <a href="javascript:;"
-                           onclick="context_menu(this, [{'contains': ['sha256'], 'value': '{{ curr_file.sha256Hex }}' }], 0, {{ container.id }}, null, false);">
+                           onclick="context_menu(this, [{'contains': ['sha256'], 'value': '{{ curr_file.sha256Hex|escapejs }}' }], 0, {{ container.id }}, null, false);">
                           {{ curr_file.sha256Hex }}
                           &nbsp;
                           <span class="fa fa-caret-down" style="font-size: smaller;"></span>
@@ -147,7 +147,7 @@ and limitations under the License.
                     {% for curr_file in info.executableSet %}
                       {% if curr_file.sha1Hex %}
                         <a href="javascript:;"
-                           onclick="context_menu(this, [{'contains': ['sha1'], 'value': '{{ curr_file.sha1Hex }}' }], 0, {{ container.id }}, null, false);">
+                           onclick="context_menu(this, [{'contains': ['sha1'], 'value': '{{ curr_file.sha1Hex|escapejs }}' }], 0, {{ container.id }}, null, false);">
                           {{ curr_file.sha1Hex }}
                           &nbsp;
                           <span class="fa fa-caret-down" style="font-size: smaller;"></span>
@@ -162,7 +162,7 @@ and limitations under the License.
                     {% for curr_file in info.executableSet %}
                       {% if curr_file.sha384Hex %}
                         <a href="javascript:;"
-                           onclick="context_menu(this, [{'contains': ['sha384'], 'value': '{{ curr_file.sha384Hex }}' }], 0, {{ container.id }}, null, false);">
+                           onclick="context_menu(this, [{'contains': ['sha384'], 'value': '{{ curr_file.sha384Hex|escapejs }}' }], 0, {{ container.id }}, null, false);">
                           {{ curr_file.sha384Hex }}
                           &nbsp;
                           <span class="fa fa-caret-down" style="font-size: smaller;"></span>
@@ -177,7 +177,7 @@ and limitations under the License.
                     {% for curr_file in info.executableSet %}
                       {% if curr_file.sha224Hex %}
                         <a href="javascript:;"
-                           onclick="context_menu(this, [{'contains': ['sha224'], 'value': '{{ curr_file.sha224Hex }}' }], 0, {{ container.id }}, null, false);">
+                           onclick="context_menu(this, [{'contains': ['sha224'], 'value': '{{ curr_file.sha224Hex|escapejs }}' }], 0, {{ container.id }}, null, false);">
                           {{ curr_file.sha224Hex }}
                           &nbsp;
                           <span class="fa fa-caret-down" style="font-size: smaller;"></span>
@@ -192,7 +192,7 @@ and limitations under the License.
                     {% for curr_file in info.executableSet %}
                       {% if curr_file.sha512Hex %}
                         <a href="javascript:;"
-                           onclick="context_menu(this, [{'contains': ['sha512'], 'value': '{{ curr_file.sha512Hex }}' }], 0, {{ container.id }}, null, false);">
+                           onclick="context_menu(this, [{'contains': ['sha512'], 'value': '{{ curr_file.sha512Hex|escapejs }}' }], 0, {{ container.id }}, null, false);">
                           {{ curr_file.sha512Hex }}
                           &nbsp;
                           <span class="fa fa-caret-down" style="font-size: smaller;"></span>

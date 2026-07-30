@@ -1,9 +1,9 @@
 # Cofense Intelligence
 
-Publisher: Splunk \
-Connector Version: 2.0.9 \
-Product Vendor: Cofense \
-Product Name: Cofense Intelligence \
+Publisher: Splunk <br>
+Connector Version: 2.0.9 <br>
+Product Vendor: Cofense <br>
+Product Name: Cofense Intelligence <br>
 Minimum Product Version: 5.1.0
 
 This App integrates with Cofense Intelligence to provide various hunting and reporting actions in addition to threat ingestion
@@ -21,19 +21,19 @@ VARIABLE | REQUIRED | TYPE | DESCRIPTION
 
 ### Supported Actions
 
-[test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity \
-[hunt url](#action-hunt-url) - Look for information about a URL \
-[hunt file](#action-hunt-file) - Look for information about a file \
-[hunt ip](#action-hunt-ip) - Look for information about an IP \
-[hunt domain](#action-hunt-domain) - Look for information about a domain \
-[get report](#action-get-report) - Get threat details \
+[test connectivity](#action-test-connectivity) - Validate the asset configuration for connectivity <br>
+[hunt url](#action-hunt-url) - Look for information about a URL <br>
+[hunt file](#action-hunt-file) - Look for information about a file <br>
+[hunt ip](#action-hunt-ip) - Look for information about an IP <br>
+[hunt domain](#action-hunt-domain) - Look for information about a domain <br>
+[get report](#action-get-report) - Get threat details <br>
 [on poll](#action-on-poll) - Action to ingest threats
 
 ## action: 'test connectivity'
 
 Validate the asset configuration for connectivity
 
-Type: **test** \
+Type: **test** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -48,7 +48,7 @@ No Output
 
 Look for information about a URL
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 The action executes search API, that returns information about every matching report. The output data is restricted to include only report information and URL queried. <br>If <b>max_threat_count</b> parameter is not specified, the action will use 100.
@@ -106,7 +106,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Look for information about a file
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 The action executes search API, that returns information about every matching report. The output data is restricted to include only report information and file queried. <br>If <b>max_threat_count</b> parameter is not specified, the action will use 100.
@@ -166,7 +166,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Look for information about an IP
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 The action executes search API, that returns information about every matching report. The output data is restricted to include only report information and IP queried. <br>If <b>max_threat_count</b> parameter is not specified, the action will use 100.
@@ -242,7 +242,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Look for information about a domain
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 The action executes search API, that returns information about every matching report. The output data is restricted to include only report information and domain queried. <br>If <b>max_threat_count</b> parameter is not specified, the action will use 100.
@@ -299,7 +299,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Get threat details
 
-Type: **investigate** \
+Type: **investigate** <br>
 Read only: **True**
 
 #### Action Parameters
@@ -415,7 +415,7 @@ summary.total_objects_successful | numeric | | 1 |
 
 Action to ingest threats
 
-Type: **ingest** \
+Type: **ingest** <br>
 Read only: **True**
 
 <p>For the first poll, ingest all the threats during past number of days set in <b>first_scheduled_ingestion_span</b>. Subsequent polls ingest new or updated threats. The threats are ordered in ascending order based on occurrence time.<br>Only create CEFs for following types:<br>. executableSet<br>. blockSet with impact of major or moderate</p><table><tbody><tr class='plain'><th>IOC</th><th>Artifact Name</th><th>CEF Field</th></tr><tr><td>Address IPv4</td><td>IP Artifact</td><td>destinationAddress</td></tr><tr><td>File</td><td>File Artifact</td><td>fileHashMd5, fileHashSha1, fileHashSha384, fileHashSha512, fileHashSha224, fileHashSha256, fileName, fileType, fileModificationTime</td></tr><tr><td>Host</td><td>Domain Artifact</td><td>destinationDnsDomain</td></tr><tr><td>URL</td><td>URL Artifact</td><td>requestURL</td></tr><tr><td>Threat Details</td><td>Threat Artifact</td><td>CofenseIntelligenceThreatId, threatType</td></tr></tbody></table>.
@@ -438,7 +438,7 @@ ______________________________________________________________________
 
 Auto-generated Splunk SOAR Connector documentation.
 
-Copyright 2025 Splunk Inc.
+Copyright 2026 Splunk Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
